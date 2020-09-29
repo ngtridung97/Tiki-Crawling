@@ -1,92 +1,25 @@
-[Tiki](https://tiki.vn/) is one of the most popular e-commerce website in Vietnam. The purpose of this project is crawling as much as possible product information then reshape them in PostgreSQL. Scripts can be fired daily to collect historical pricing data for a week.
+[Tiki](https://tiki.vn/) is one of the most popular e-commerce websites in Vietnam. The purpose of this project is crawling as much as possible product information, then reshape them in PostgreSQL. Scripts can be fired daily to collect historical pricing data for a week.
 
 **Features:**
 + Database: [PostgreSQL 12.1 64-bit](https://www.postgresql.org/download/)
 + Language: [Python 3.7.4](https://www.python.org/downloads/release/python-374/)
-+ Libraries: [psycopg2](https://pypi.org/project/psycopg2/), [requests](https://pypi.org/project/requests/), [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
++ Libraries: [psycopg2](https://pypi.org/project/psycopg2/), [requests](https://pypi.org/project/requests/), [beautifulsoup4](https://pypi.org/project/beautifulsoup4/), [smtplib](https://docs.python.org/3/library/smtplib.html)
 + Platform: [Anaconda](https://www.anaconda.com/)
-+ Sample Script: [Tiki_v1.ipynb](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Tiki_v1.ipynb)
++ Sample Scripts: [Tiki_v2_Category.ipynb](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories/Tiki_v2_Category.ipynb), [Tiki_v2_Product.ipynb](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories/Tiki_v2_Product.ipynb)
 
 See how it works below
 
-### First approach - Loop through all main categories
+### Introduction
 ----------
-The idea is crawling every sub-pages of each category, which looks like the above image.
+[Phase 01](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2001%20-%20Check%201%20SKU%20and%20send%20email%20alert) - Gather product URLs list, apply conditions, send an email whether that condition was met.
 
-**Get html information by BS and category list**
-```python
-soup = get_web('https://tiki.vn')
-categories = soup.findAll('a', {'class', "MenuItem__MenuLink-sc-181aa19-1 fKvTQu"})
-category, link = [], []
+[Phase 02](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2002%20-%20Loop%20through%20all%20SKUs%20in%2016%20main%20categories) - Gather 16 main-category URLs list, loop until the last page of each URL.
 
-for h in range(len(categories)):
-    try:
-        link.append(categories[h]['href'])
-        category.append(categories[h].text)
-    except:
-        print('pass')
-        
-cat = list(zip(category,link))
-```
+[Phase 03](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories) - Gather an active main-and-sub category list, classify all "deepest-category" URLs, loop until the last page of each URL.
 
-**Main crawling function in 1 page**
-```python
-def crawl_insert(cat, j, articles, k, cur, conn, tablename):
-    brand = articles[k]['data-brand'].strip().replace("'", "")
-    category = cat[j][0]
-    sub_category = articles[k]['data-category'].strip().replace("'", "")
-    product = articles[k]['data-title'].strip().replace("'", "")
-    product_id = articles[k]['data-seller-product-id'].strip()
-    product_sku = articles[k]['product-sku'].strip()
-    img = articles[k].img['src'].strip()
-    final_price = articles[k].find_all('span', {'class': "final-price"})[0].text.strip().replace("đ", "").replace(".", "").split(' ')[0]
-    regular_price = final_price if articles[k].find_all('span', {'class': "price-regular"}) == [] else articles[k].find_all('span', {'class': "price-regular"})[0].text.strip().replace("đ", "").replace(".", "").split(' ')[0]
-    disc_perc = "0%" if articles[k].find_all('span', {'class': "sale-tag sale-tag-square"}) == [] else articles[k].find_all('span', {'class': "sale-tag sale-tag-square"})[0].text.strip().split(' ')[0]
-    voucher = ["?" if articles[k].find_all('p', {'class': "price-tag"}) == [] else articles[k].find_all('span', {'class': "code"})[0].text][0]
-    voucher_price = ["?" if articles[k].find_all('p', {'class': "price-tag"}) == [] else articles[k].find_all('span', {'class': "price"})[0].find('span').text.replace("đ", "").replace(".", "")][0]
-    installment = ["?" if articles[k].find_all('span', {'class': "installment-price-v2"}) == [] else articles[k].find_all('span', {'class': "installment-price-v2"})[0].text][0]
-    review = [articles[k].find_all('p', {'class': "review"})[0].text.strip('\(\)') if articles[k].find_all('p', {'class': "review"}) != [] else "Chưa có nhận xét"][0]
-    rating = ["?" if articles[k].find_all('span', {'class': "rating-content"}) == [] else articles[k].find_all('span', {'class': "rating-content"})[0].find('span')['style'].split(':')[1]][0]
-    product_link = 'https://tiki.vn' + articles[k].a['href']
-    batch = strftime("%Y-%m-%d %H:%M:%S", localtime())
-```
+Phase 04 - Gather all product URLs in Phase 03, add on other SKUs options (In Progress).
 
-**Main crawling code in many pages**
-```python
-for j in range(len(cat)):
-    soup = get_web(cat[j][1])
-    articles = soup.find_all('div', {'class': "product-item"})
-    print('Looping: ' + cat[j][1])
-    for k in range(len(articles)):
-        crawl_insert(cat, j, articles, k, cur, conn, tablename)
-
-    links = soup.find_all('div', {'class': "list-pager"})
-        
-    # Exit while loop when reaching to the last page
-    while links[0].find_all('a', {'class': "next"}) != []:
-        soup = get_web('https://tiki.vn' + links[0].find_all('a', {'class': "next"})[0]['href'])
-        articles = soup.find_all('div', {'class': "product-item"})
-        print('Looping: ', cat[j][0], links[0].find_all('a', {'class': "next"})[0]['href'].split('&')[1], sep=' ')
-        for i in range(len(articles)):
-            crawl_insert(cat, j, articles, i, cur, conn, tablename)
-        links = soup.find_all('div', {'class': "list-pager"})
-        
-print('Crawl done!')
-```
-
-**Result**
-
-In the batch "26-June-2020", I collected 20255 records and I also notice the maximum page view per url is 209.
-
-That's why I think with the above code, we can't crawl enough information due to limit in a number of page view. For examples: only category "Thiết Bị Số - Phụ Kiện Số" had around more than 1 millions item in that day.
-
-That led to another thought about getting a fullfil information: get a list contain all links categories and sub-categories, then loop though every url of that list.
-
-### Second approach - Loop through all main categories and sub categories urls
-----------
-The idea is just like 1st way, we need to append a list that gather all categories (both main and sub) from the website, then crawling every pages of them instead of only main categories.
-
-In progress.
+Phase 05 - Call Tiki's Category and Product API (In Progress).
 
 ### Feedback & Suggestions
 ----------
