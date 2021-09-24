@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import os
 
-category_path = 'Category_py.csv'
+category_path = 'Category.csv'
 if os.path.exists(category_path):
     os.remove(category_path)
 

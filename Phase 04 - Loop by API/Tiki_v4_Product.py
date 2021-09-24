@@ -47,4 +47,13 @@ def get_prod(cate_id):
             
     return prod_list
 
-get_prod('1795')
+df = pd.read_csv('Category_py.csv', sep='\t', encoding='utf-16', names=('cate_id', 'cate_name', 'parent_id'))
+merge = pd.merge(df, df, left_on = ['cate_id'], right_on= ['parent_id'], how = 'left')
+merge = merge[merge['cate_id_y'].isnull()]
+merge = merge[['cate_id_x']]
+merge.rename(columns = {'cate_id_x' : 'cate_name'}, inplace = True)
+
+for index, row in merge.iterrows():
+    get_prod(row['cate_name'])
+
+print('Crawl done!')
