@@ -2,12 +2,17 @@ import requests
 from collections import deque
 import json
 import re
-import pandas as pd  
+import numpy as np
+import pandas as pd
+import os
+
+category_path = 'Category_py.csv'
+if os.path.exists(category_path):
+    os.remove(category_path)
 
 def get_web(url):
     headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"}
     response = requests.get(url, headers=headers)
-    #soup = BeautifulSoup(response.content, 'html.parser')
     return response
 
 def get_main():
@@ -18,10 +23,14 @@ def get_main():
     i = 0
     for d in data['data']:
         try:
-            query_id = re.findall('([1-9][0-9]*)', data['data'][i]['item']['url'])[0]
-            title = data['data'][i]['item']['title']
-            parent_id = '0'
-            cate_list.append((query_id, title, parent_id))
+            #if data['data'][i]['item']['id'] == 440:
+                query_id = re.findall('([1-9][0-9]*)', data['data'][i]['item']['url'])[0]
+                title = data['data'][i]['item']['title']
+                parent_id = '0'
+
+                cate_list.append((query_id, title, parent_id))
+                df = pd.DataFrame(cate_list)
+                df.to_csv(category_path, sep='\t', encoding='utf-16', mode='a', header=False, index=False)
         except Exception as err:
             print(err)
         i += 1
@@ -43,6 +52,8 @@ def get_sub(parent_cate):
                 parent_id = parent_cate[0]
 
                 sub_cate_list.append((query_id, title, parent_id))
+                df = pd.DataFrame(sub_cate_list)
+                df.to_csv(category_path, sep='\t', encoding='utf-16', mode='a', header=False, index=False)
             except Exception as err:
                 print(err)
             i += 1
@@ -53,10 +64,9 @@ def get_all(main_cate):
     queue = deque(main_cate)
     while queue:
         parent_cate = queue.popleft()
-        #category_list = get_sub(parent_cate)
-        category_list = queue.extend(get_sub(parent_cate))
+        category_list = get_sub(parent_cate)
+        queue.extend(category_list)
 
-    return category_list
-
-#main_cate = get_main()
-print(get_all(get_main()))
+main_cate = get_main()
+get_all(main_cate)
+print('Crawl done!')
