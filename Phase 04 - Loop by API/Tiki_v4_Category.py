@@ -23,14 +23,13 @@ def get_main():
     i = 0
     for d in data['data']:
         try:
-            #if data['data'][i]['item']['id'] == 440:
-                query_id = re.findall('([1-9][0-9]*)', data['data'][i]['item']['url'])[0]
-                title = data['data'][i]['item']['title']
-                parent_id = '0'
+            query_id = re.findall('([1-9][0-9]*)', data['data'][i]['item']['url'])[0]
+            title = data['data'][i]['item']['title']
+            parent_id = '0'
 
-                cate_list.append((query_id, title, parent_id))
-                df = pd.DataFrame(cate_list)
-                df.to_csv(category_path, sep='\t', encoding='utf-16', mode='a', header=False, index=False)
+            df = pd.DataFrame((query_id, title, parent_id)).T
+            df.to_csv(category_path, sep='\t', encoding='utf-16', mode='a', header=False, index=False)
+            cate_list.append((query_id, title, parent_id))
         except Exception as err:
             print(err)
         i += 1
@@ -51,9 +50,9 @@ def get_sub(parent_cate):
                 title = sub_data['filters'][0]['values'][i]['display_value']
                 parent_id = parent_cate[0]
 
-                sub_cate_list.append((query_id, title, parent_id))
-                df = pd.DataFrame(sub_cate_list)
+                df = pd.DataFrame((query_id, title, parent_id)).T
                 df.to_csv(category_path, sep='\t', encoding='utf-16', mode='a', header=False, index=False)
+                sub_cate_list.append((query_id, title, parent_id))
             except Exception as err:
                 print(err)
             i += 1
