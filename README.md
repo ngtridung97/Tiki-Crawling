@@ -5,7 +5,7 @@
 + Language: [Python 3.7.4](https://www.python.org/downloads/release/python-374/)
 + Libraries: [psycopg2](https://pypi.org/project/psycopg2/), [requests](https://pypi.org/project/requests/), [beautifulsoup4](https://pypi.org/project/beautifulsoup4/), [smtplib](https://docs.python.org/3/library/smtplib.html)
 + Platform: [Anaconda](https://www.anaconda.com/)
-+ Sample Scripts: [Tiki_v2_Category.ipynb](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories/Tiki_v2_Category.ipynb), [Tiki_v2_Product.ipynb](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories/Tiki_v2_Product.ipynb)
++ Sample Scripts:
 
 See how it works below
 
@@ -15,11 +15,11 @@ See how it works below
 
 [Phase 02](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2002%20-%20Loop%20through%20all%20SKUs%20in%2016%20main%20categories) - Gather 16 main-category URLs list, loop until the last page of each URL.
 
-[Phase 03](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories) - Gather an active main-and-sub category list, classify all "deepest-category" URLs, loop until the last page of each URL.
+[Phase 03](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2003%20-%20Loop%20through%20all%20SKUs%20in%20deepest%20categories) - Gather all active category Urls list, classify leaf category URLs, loop until the last page of each leaf.
 
-Phase 04 - Gather all product URLs in Phase 03, add on other SKUs options (In Progress).
+[Phase 04](https://github.com/ngtridung97/Tiki-Crawling/tree/master/Phase%2004%20-%20Loop%20by%20API) - Get Tiki's Category and Product API.
 
-Phase 05 - Call Tiki's Category and Product API (In Progress).
+Phase 05 - Scrapy, seller_id and configurable_product (In Progress).
 
 ### Feedback & Suggestions
 ----------
