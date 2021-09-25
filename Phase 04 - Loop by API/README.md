@@ -4,7 +4,7 @@ We are moving to another option to crawl Tiki - using their API through "Inspect
 
 **Result**
 
-![](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Phase%2004%20-%20Loop%20by%20API/Tiki_API.png?raw=true)
+![](https://github.com/ngtridung97/Tiki-Crawling/blob/master/Phase%2004%20-%20Loop%20by%20API/Tiki_API.PNG?raw=true)
 
 After finishing Category part, we should run a simple self-join query (temporarily using Pandas instead) to get leaf category list. After that, loop through each id, paging, ... to get full picture. Results simply stored in csv.
 
